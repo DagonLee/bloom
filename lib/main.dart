@@ -1,11 +1,11 @@
-
 import 'dart:async';
 import 'dart:io';
-
+import 'dart:convert' as convert;
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 Future<void> main() async{
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
@@ -26,21 +26,6 @@ Future<void> main() async{
     ));
 }
 
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       title: 'My Memory Proto1',
-//       theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-//         useMaterial3: true,
-//       ),
-//       home: const MyHomePage(title: 'MyMemory Proto1'),
-//     );
-//   }
-// }
-
 class MyAppState extends ChangeNotifier {
   void getNext() {
     notifyListeners();
@@ -56,14 +41,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  var selectedPage = 0;
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -92,21 +69,14 @@ class _MyHomePageState extends State<MyHomePage> {
               ]
             )
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: _incrementCounter,
-            tooltip: 'Increment',
-            child: const Icon(Icons.add),
-          ), // This trailing comma makes auto-formatting nicer for build methods.
         );
       }
     );
   }
 }
 
-
 class AlbumRoute extends StatelessWidget {
   const AlbumRoute({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +115,6 @@ class _RecordPageState extends State<RecordPage> {
       // Define the resolution to use.
       ResolutionPreset.medium,
     );
-
     // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
   }
@@ -160,7 +129,7 @@ class _RecordPageState extends State<RecordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Take a picture')),
+      appBar: AppBar(title: const Text('촬영 모드')),
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
@@ -213,18 +182,41 @@ class _RecordPageState extends State<RecordPage> {
 }
 
 // A widget that displays the picture taken by the user.
-class DisplayPictureScreen extends StatelessWidget {
+class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
-
   const DisplayPictureScreen({super.key, required this.imagePath});
+  @override
+  DisplayPictureState createState() => DisplayPictureState();
+}
+class DisplayPictureState extends State<DisplayPictureScreen>{
+  Future<String> callApi(dynamic file) async{
+    var postUri = Uri.parse("http://211.184.1.44:5000/predict");
+    var request = http.MultipartRequest("POST", postUri);
+    request.files.add(await http.MultipartFile.fromPath("file", widget.imagePath, contentType: new MediaType('image', 'jpeg')));
+    
+  // Await the http get response, then decode the json-formatted response.
+    var streamedResponse = await request.send();
+    var response = await http.Response.fromStream(streamedResponse);
+    var data = response.body;
+    return data;
+  }
+  @override
+  void initState()  {
+    // api 호출
+    callApi(File(widget.imagePath)).then((value){
+      print(value);
+    });
 
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Display the Picture')),
       // The image is stored as a file on the device. Use the `Image.file`
       // constructor with the given path to display the image.
-      body: Image.file(File(imagePath)),
+      body: Image.file(File(widget.imagePath)),
     );
   }
 }
+
