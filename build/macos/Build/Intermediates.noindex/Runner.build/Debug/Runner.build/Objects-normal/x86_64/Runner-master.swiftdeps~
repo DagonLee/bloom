@@ -1,0 +1,8 @@
+version: "Apple Swift version 5.8.1 (swiftlang-5.8.0.124.5 clang-1403.0.22.11.100)"
+options: "feff5bf66da417d6694a68884cdfada0264967c8747dfe78f0a12030dde4b5f9"
+build_start_time: [1686050232, 274769000]
+build_end_time: [1686050232, 327445000]
+inputs:
+  "/Users/idagon/Desktop/BloomProject/proto1/macos/Flutter/GeneratedPluginRegistrant.swift": !private [1686050213, 228981632]
+  "/Users/idagon/Desktop/BloomProject/proto1/macos/Runner/AppDelegate.swift": !private [1685666916, 0]
+  "/Users/idagon/Desktop/BloomProject/proto1/macos/Runner/MainFlutterWindow.swift": !private [1685666916, 0]
