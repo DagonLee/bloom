@@ -7,34 +7,41 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-Future<void> main() async{
+import 'gallery/sample_screen.dart';
+
+Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
   WidgetsFlutterBinding.ensureInitialized();
   // Obtain a list of the available cameras on the device.
   final cameras = await availableCameras();
-  
+
   // Get a specific camera from the list of available cameras.
   final firstCamera = cameras.first;
   runApp(MaterialApp(
-      title: 'My Memory Proto1',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
-      home: MyHomePage(title: 'MyMemory Proto1', camera: firstCamera),
-    ));
+    title: 'My Memory Proto1',
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+      useMaterial3: true,
+    ),
+    home: MyHomePage(title: 'MyMemory Proto1', camera: firstCamera),
+  ));
 }
 
-
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title, required this.camera,});
+  const MyHomePage({
+    super.key,
+    required this.title,
+    required this.camera,
+  });
   final String title;
   final CameraDescription camera;
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
+
 enum TtsState { playing, stopped, paused, continued }
+
 class _MyHomePageState extends State<MyHomePage> {
   late FlutterTts flutterTts;
   String language = "ko";
@@ -62,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
     initTts();
     _speak("안녕하세요 My Memory 입니다 환영합니다.");
   }
+
   initTts() {
     flutterTts = FlutterTts();
 
@@ -147,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await flutterTts.setPitch(pitch);
 
     if (txt != "") {
-        await flutterTts.speak(txt);
+      await flutterTts.speak(txt);
     }
   }
 
@@ -163,62 +171,46 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, contstraints) {
-        return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: Text(widget.title),
-          ),
-          body: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children:[
-              ElevatedButton(onPressed: (){
-                Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => RecordPage(camera: widget.camera, tts: flutterTts)),
-              );}, child : const Text('촬영모드')),
-              ElevatedButton(onPressed: (){
-                Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AlbumRoute()),
-                );
-              }, child : const Text('앨범모드')),
-              ]
-            )
-          ),
-        );
-      }
-    );
-  }
-}
-class AlbumRoute extends StatelessWidget {
-  const AlbumRoute({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Album Page'),
-      ),
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Go back!'),
+    return LayoutBuilder(builder: (context, contstraints) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
         ),
-      ),
-    );
+        body: Center(
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          RecordPage(camera: widget.camera, tts: flutterTts)),
+                );
+              },
+              child: const Text('촬영모드')),
+          ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AlbumRoute()),
+                );
+              },
+              child: const Text('앨범모드')),
+        ])),
+      );
+    });
   }
 }
-class RecordPage extends StatefulWidget{
+
+class RecordPage extends StatefulWidget {
   final CameraDescription camera;
   final FlutterTts tts;
   RecordPage({super.key, required this.camera, required this.tts});
   @override
   State<RecordPage> createState() => _RecordPageState();
 }
+
 class _RecordPageState extends State<RecordPage> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
@@ -237,11 +229,13 @@ class _RecordPageState extends State<RecordPage> {
     // Next, initialize the controller. This returns a Future.
     _initializeControllerFuture = _controller.initialize();
   }
+
   Future _speak(String txt) async {
     if (txt != "") {
-        await widget.tts.speak(txt);
+      await widget.tts.speak(txt);
     }
   }
+
   @override
   void dispose() {
     // Dispose of the controller when the widget is disposed.
@@ -287,11 +281,10 @@ class _RecordPageState extends State<RecordPage> {
             await Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) => DisplayPictureScreen(
-                  // Pass the automatically generated path to
-                  // the DisplayPictureScreen widget.
-                  imagePath: image.path,
-                  tts: widget.tts
-                ),
+                    // Pass the automatically generated path to
+                    // the DisplayPictureScreen widget.
+                    imagePath: image.path,
+                    tts: widget.tts),
               ),
             );
           } catch (e) {
@@ -309,30 +302,35 @@ class _RecordPageState extends State<RecordPage> {
 class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
   final FlutterTts tts;
-  const DisplayPictureScreen({super.key, required this.imagePath, required this.tts});
+  const DisplayPictureScreen(
+      {super.key, required this.imagePath, required this.tts});
   @override
   DisplayPictureState createState() => DisplayPictureState();
 }
-class DisplayPictureState extends State<DisplayPictureScreen>{
-  Future<String> callApi(dynamic file) async{
+
+class DisplayPictureState extends State<DisplayPictureScreen> {
+  Future<String> callApi(dynamic file) async {
     var postUri = Uri.parse("http://211.184.1.44:5000/predict");
     var request = http.MultipartRequest("POST", postUri);
-    request.files.add(await http.MultipartFile.fromPath("file", widget.imagePath, contentType: new MediaType('image', 'jpeg')));
-    
-  // Await the http get response, then decode the json-formatted response.
+    request.files.add(await http.MultipartFile.fromPath(
+        "file", widget.imagePath,
+        contentType: new MediaType('image', 'jpeg')));
+
+    // Await the http get response, then decode the json-formatted response.
     var streamedResponse = await request.send();
     var response = await http.Response.fromStream(streamedResponse);
     var data = response.body;
     return data;
   }
+
   @override
-  void initState()  {
+  void initState() {
     // api 호출
-    callApi(File(widget.imagePath)).then((value){
+    callApi(File(widget.imagePath)).then((value) {
       print(value);
       final ans = json.decode(value);
       // widget.tts.speak(ans["ans"]);
-      getTranslation_papago(ans["ans"]).then((value){
+      getTranslation_papago(ans["ans"]).then((value) {
         widget.tts.speak(value);
       });
       // widget.tts.speak(res);
@@ -340,6 +338,7 @@ class DisplayPictureState extends State<DisplayPictureScreen>{
 
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -351,32 +350,30 @@ class DisplayPictureState extends State<DisplayPictureScreen>{
   }
 }
 
-
 Future getTranslation_papago(String txt) async {
-    String _client_id = "WYX9Cy9eD1ffV5IUEDAo";
-    String _client_secret = "n2AsCIc6L6";
-    String _content_type = "application/x-www-form-urlencoded; charset=UTF-8";
-    String _url = "https://openapi.naver.com/v1/papago/n2mt";
-    
+  String _client_id = "WYX9Cy9eD1ffV5IUEDAo";
+  String _client_secret = "n2AsCIc6L6";
+  String _content_type = "application/x-www-form-urlencoded; charset=UTF-8";
+  String _url = "https://openapi.naver.com/v1/papago/n2mt";
 
-    http.Response trans = await http.post(
-      Uri.parse(_url),
-      headers: {
-        'Content-Type': _content_type,
-        'X-Naver-Client-Id': _client_id,
-        'X-Naver-Client-Secret': _client_secret
-      },
-      body: {
-        'source': "en",//위에서 언어 판별 함수에서 사용한 language 변수
-        'target': "ko",//원하는 언어를 선택할 수 있다. 
-        'text': txt,
-      },
-    );
-    if (trans.statusCode == 200) {
-      var dataJson = jsonDecode(trans.body);
-      var resultPapago = dataJson['message']['result']['translatedText'];
-      return resultPapago;
-    } else {
-      return trans.statusCode;
-    }
+  http.Response trans = await http.post(
+    Uri.parse(_url),
+    headers: {
+      'Content-Type': _content_type,
+      'X-Naver-Client-Id': _client_id,
+      'X-Naver-Client-Secret': _client_secret
+    },
+    body: {
+      'source': "en", //위에서 언어 판별 함수에서 사용한 language 변수
+      'target': "ko", //원하는 언어를 선택할 수 있다.
+      'text': txt,
+    },
+  );
+  if (trans.statusCode == 200) {
+    var dataJson = jsonDecode(trans.body);
+    var resultPapago = dataJson['message']['result']['translatedText'];
+    return resultPapago;
+  } else {
+    return trans.statusCode;
   }
+}
