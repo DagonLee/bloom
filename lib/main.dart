@@ -175,10 +175,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, contstraints) {
       return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: Text(widget.title),
-        ),
+        // appBar: AppBar(
+        //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        //   title: Text(widget.title),
+        // ),
         body: GestureDetector(
           onDoubleTap: () {
             print("촬영모드로 이동");
@@ -206,70 +206,99 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(
                   children: [
                     Expanded(
-                      flex: 1,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            print('Camera 버튼 클릭!');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => RecordPage(
-                                      camera: widget.camera, tts: flutterTts)),
-                            );
-                          },
-                          //Contents of the button
-                          style: ElevatedButton.styleFrom(
-                            //Change font size
-                            textStyle: const TextStyle(
-                              fontSize: 18,
-                            ),
-                            //padding: const EdgeInsets.all(50.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0)),
-                          ),
-                          icon: Icon(
-                            Icons.camera_alt_outlined,
-                            size: 50,
-                          ),
-                          label: Text('Camera'),
-                        ),
+                      flex: 2,
+                      child: Center(
+                        child: Container(
+                            // color: Colors.pink,
+                            width: double.infinity,
+                            child: Image.asset('assets/images/logo.png')),
                       ),
-                    ),
-                    SizedBox(
-                      height: 10,
                     ),
                     Expanded(
-                      flex: 1,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            print('Gallery 버튼 클릭!');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      AlbumRoute(tts: flutterTts)),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            //Change font size
-                            textStyle: const TextStyle(
-                              fontSize: 18,
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            flex: 1,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  print('Camera 버튼 클릭!');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => RecordPage(
+                                            camera: widget.camera,
+                                            tts: flutterTts)),
+                                  );
+                                },
+                                //Contents of the button
+                                style: ElevatedButton.styleFrom(
+                                  //Change font size
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                  ),
+                                  //padding: const EdgeInsets.all(50.0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(20.0)),
+                                ),
+                                icon: Icon(
+                                  Icons.camera_alt_outlined,
+                                  size: 50,
+                                ),
+                                label: Text('카메라',
+                                    style: TextStyle(
+                                        fontSize: 28.0,
+                                        fontWeight: FontWeight.bold)),
+                              ),
                             ),
-                            padding: const EdgeInsets.all(50.0),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20.0)),
                           ),
-                          icon: Icon(
-                            Icons.photo_outlined,
-                            size: 50,
+                          SizedBox(
+                            height: 10,
                           ),
-                          label: Text('Gallery'),
-                        ),
+                          Expanded(
+                            flex: 1,
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () {
+                                  print('Gallery 버튼 클릭!');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            AlbumRoute(tts: flutterTts)),
+                                  );
+                                },
+                                //Contents of the button
+                                style: ElevatedButton.styleFrom(
+                                  //Change font size
+                                  textStyle: const TextStyle(
+                                    fontSize: 18,
+                                  ),
+                                  //padding: const EdgeInsets.all(50.0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(20.0)),
+                                ),
+                                icon: Icon(
+                                  Icons.photo,
+                                  size: 50,
+                                ),
+                                label: Text('사진첩',
+                                    style: TextStyle(
+                                        fontSize: 28.0,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    Spacer(
+                      flex: 1,
                     )
                   ],
                 ),

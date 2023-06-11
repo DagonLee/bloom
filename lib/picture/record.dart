@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:namer_app/picture/splash_screen.dart';
 import 'display_picture.dart';
 import '../sqlhelper.dart';
 import '../main.dart';
@@ -52,52 +53,55 @@ class _RecordPageState extends State<RecordPage> {
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: const Text('촬영 모드')),
+      appBar: AppBar(
+          title: const Text('촬영 모드',
+              style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold))),
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
       body: GestureDetector(
-        onDoubleTap: (){
+        onDoubleTap: () {
           Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => MyHomePage(
-                        title: 'MyMemory', camera: widget.camera)),
-                (route) => false);
-        },
-        onTap:() async{
-          try {
-              // Ensure that the camera is initialized.
-              await _initializeControllerFuture;
-
-              // Attempt to take a picture and get the file `image`
-              // where it was saved.
-              final image = await _controller.takePicture();
-
-              if (!mounted) return;
-
-              // If the picture was taken, display it on a new screen.
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DisplayPictureScreen(
-                      // Pass the automatically generated path to
-                      // the DisplayPictureScreen widget.
-                      imagePath: image.path,
-                      tts: widget.tts),
-                ),
-              );
-            } catch (e) {
-              // If an error occurs, log the error to the console.
-              print(e);
-            }
-        },
-        onLongPress: (){
-          Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => AlbumRoute(tts: widget.tts)),
+                  builder: (BuildContext context) =>
+                      MyHomePage(title: 'MyMemory', camera: widget.camera)),
+              (route) => false);
+        },
+        onTap: () async {
+          try {
+            // Ensure that the camera is initialized.
+            await _initializeControllerFuture;
+
+            // Attempt to take a picture and get the file `image`
+            // where it was saved.
+            final image = await _controller.takePicture();
+
+            if (!mounted) return;
+
+            // If the picture was taken, display it on a new screen.
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                // builder: (context) => DisplayPictureScreen(
+                builder: (context) => SplashScreen(
+                    // Pass the automatically generated path to
+                    // the DisplayPictureScreen widget.
+                    imagePath: image.path,
+                    tts: widget.tts),
+              ),
             );
+          } catch (e) {
+            // If an error occurs, log the error to the console.
+            print(e);
+          }
+        },
+        onLongPress: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => AlbumRoute(tts: widget.tts)),
+          );
         },
         child: FutureBuilder<void>(
           future: _initializeControllerFuture,
@@ -118,24 +122,30 @@ class _RecordPageState extends State<RecordPage> {
           },
         ),
       ),
-      
+
       bottomNavigationBar: BottomNavigationBar(
         // backgroundColor: colorScheme.background,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(
+              Icons.home,
+              size: 45,
+            ),
+            label: '홈',
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.camera_alt,
-              size: 40,
+              size: 55,
             ),
-            label: 'photo',
+            label: '촬영',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.photo),
-            label: 'gallery',
+            icon: Icon(
+              Icons.photo,
+              size: 45,
+            ),
+            label: '사진첩',
           ),
         ],
         currentIndex: selectedIndex,
@@ -146,8 +156,8 @@ class _RecordPageState extends State<RecordPage> {
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                    builder: (BuildContext context) => MyHomePage(
-                        title: 'My Memory', camera: widget.camera)),
+                    builder: (BuildContext context) =>
+                        MyHomePage(title: 'My Memory', camera: widget.camera)),
                 (route) => false);
 
             // Navigator.pushNamedAndRemoveUntil(context, '/', (_) => false);
@@ -170,16 +180,13 @@ class _RecordPageState extends State<RecordPage> {
               final image = await _controller.takePicture();
 
               if (!mounted) return;
-
               // If the picture was taken, display it on a new screen.
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DisplayPictureScreen(
-                      // Pass the automatically generated path to
-                      // the DisplayPictureScreen widget.
-                      imagePath: image.path,
-                      tts: widget.tts),
+                  // builder: (context) => DisplayPictureScreen(
+                  builder: (context) =>
+                      SplashScreen(imagePath: image.path, tts: widget.tts),
                 ),
               );
             } catch (e) {

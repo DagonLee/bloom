@@ -11,7 +11,6 @@ import 'detail_route.dart';
 import '../sqlhelper.dart';
 import 'pageview.dart';
 
-
 class AlbumRoute extends StatefulWidget {
   const AlbumRoute({super.key, required this.tts});
   final FlutterTts tts;
@@ -25,7 +24,7 @@ class _AlbumRouteState extends State<AlbumRoute> {
   late List<AssetEntity> _images;
   int _currentPage = 0;
   late Album _currentAlbum;
-  String desc="";
+  String desc = "";
 
   //권한 확인
   Future<void> checkPermission() async {
@@ -46,7 +45,7 @@ class _AlbumRouteState extends State<AlbumRoute> {
 
     _paths!.removeWhere((item) => item.name != "MyMemory");
     // print("*****");
-    print( _paths);
+    print(_paths);
     _albums = _paths!.map((e) {
       return Album(
         id: e.id,
@@ -91,18 +90,17 @@ class _AlbumRouteState extends State<AlbumRoute> {
     File? originFile = await image.entity.originFile;
     String originPath = originFile!.path;
     String file_name = originPath.split("/").last;
-    SQLHelper.getItem(file_name)
-        .then((value) => {
+    SQLHelper.getItem(file_name).then((value) => {
           widget.tts.speak(value.first["imgDesc"]),
-        desc = value.first["imgDesc"]});
+          desc = value.first["imgDesc"]
+        });
     final index = _images.indexWhere(((item) => item.id == image.entity.id));
     print(index);
-    Navigator.push (
+    Navigator.push(
       context,
       MaterialPageRoute(
-         
-          builder: (context) =>
-              PageViewWidget(images: _images, index: index, tts: widget.tts, desc: desc)),
+          builder: (context) => PageViewWidget(
+              images: _images, index: index, tts: widget.tts, desc: desc)),
     );
   }
 
@@ -116,28 +114,24 @@ class _AlbumRouteState extends State<AlbumRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(''),
+        title: const Text('사진첩',
+            style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold)),
       ),
       body: GestureDetector(
-          onTap:(){
-
-          },
-          onDoubleTap: () {
-            
-          },
-          onLongPress: () {
-            Navigator.pop(context);
-          },
+        onTap: () {},
+        onDoubleTap: () {},
+        onLongPress: () {
+          Navigator.pop(context);
+        },
         child: NotificationListener<ScrollNotification>(
           // 현재 스크롤 위치 - scroll.metrics.pixels
           // 스크롤 끝 위치 scroll.metrics.maxScrollExtent
           onNotification: (ScrollNotification scroll) {
             final scrollPixels =
                 scroll.metrics.pixels / scroll.metrics.maxScrollExtent;
-      
-            
+
             if (scrollPixels > 0.7) getPhotos(_currentAlbum);
-      
+
             return false;
           },
           child: SafeArea(

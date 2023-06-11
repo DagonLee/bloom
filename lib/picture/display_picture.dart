@@ -14,8 +14,12 @@ import 'package:namer_app/gallery/sample_screen.dart';
 class DisplayPictureScreen extends StatefulWidget {
   final String imagePath;
   final FlutterTts tts;
+  final String result;
   const DisplayPictureScreen(
-      {super.key, required this.imagePath, required this.tts});
+      {super.key,
+      required this.imagePath,
+      required this.tts,
+      required this.result});
   @override
   DisplayPictureState createState() => DisplayPictureState();
 }
@@ -23,6 +27,7 @@ class DisplayPictureScreen extends StatefulWidget {
 class DisplayPictureState extends State<DisplayPictureScreen> {
   var tmpRes;
   var selectedIndex = 1;
+
   Future<String> callApi(dynamic file) async {
     // var postUri = Uri.parse("http://211.184.1.44:5000/predict");
     var postUri = Uri.parse("http://172.20.10.8:5000/predict");
@@ -41,15 +46,22 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
   @override
   void initState() {
     // api 호출
-    widget.tts.speak("사진을 해석 중입니다.");
-    callApi(File(widget.imagePath)).then((value) {
-      final ans = json.decode(value);
-      
-      getTranslation_papago(ans["ans"]).then((value) {
-        tmpRes = value;
-        widget.tts.speak(value);
-        widget.tts.speak("사진 저장을 원하시면 화면을 터치해주세요!");
-      });
+    // widget.tts.speak("사진을 해석 중입니다.");
+    // callApi(File(widget.imagePath)).then((value) {
+    //   final ans = json.decode(value);
+
+    //   getTranslation_papago(ans["ans"]).then((value) {
+    //     tmpRes = value;
+    //     widget.tts.speak(value);
+    //     widget.tts.speak("사진 저장을 원하시면 화면을 터치해주세요!");
+    //   });
+    // });
+
+    final ans = json.decode(widget.result);
+    getTranslation_papago(ans["ans"]).then((value) {
+      tmpRes = value;
+      widget.tts.speak(value);
+      widget.tts.speak("사진 저장을 원하시면 화면을 터치해주세요!");
     });
 
     super.initState();
@@ -60,11 +72,13 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
     var colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
+      appBar: AppBar(
+          title: const Text('사진 확인',
+              style: TextStyle(fontSize: 28.0, fontWeight: FontWeight.bold))),
       // // The image is stored as a file on the device. Use the `Image.file`
       // // constructor with the given path to display the image.
       body: GestureDetector(
-        onLongPress: () {
+          onLongPress: () {
             print("앨범모드로 이동");
             Navigator.push(
               context,
@@ -72,9 +86,9 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
                   builder: (context) => AlbumRoute(tts: widget.tts)),
             );
           },
-        onDoubleTap: (){
-          Navigator.pop(context);
-        },
+          onDoubleTap: () {
+            Navigator.pop(context);
+          },
           onTap: () {
             GallerySaver.saveImage(widget.imagePath, albumName: "MyMemory")
                 .then((value) => widget.tts.speak("사진 저장을 성공하였습니다."));
@@ -95,19 +109,25 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
         // backgroundColor: colorScheme.background,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.replay_outlined),
-            label: 'camera',
+            icon: Icon(
+              Icons.replay_outlined,
+              size: 45,
+            ),
+            label: '재촬영',
           ),
           BottomNavigationBarItem(
             icon: Icon(
               Icons.download,
-              size: 40,
+              size: 55,
             ),
-            label: 'save',
+            label: '저장',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.photo),
-            label: 'gallery',
+            icon: Icon(
+              Icons.photo,
+              size: 45,
+            ),
+            label: '사진첩',
           ),
         ],
         currentIndex: selectedIndex,
