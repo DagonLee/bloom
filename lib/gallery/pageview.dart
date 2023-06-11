@@ -5,9 +5,9 @@ import 'package:flutter_tts/flutter_tts.dart';
 
 class PageViewWidget extends StatefulWidget {
   const PageViewWidget(
-      {required this.images, required this.index, required this.tts, Key? key})
+      {required this.images, required this.index, required this.tts, Key? key, required this.desc})
       : super(key: key);
-
+  final String desc;
   final List<AssetEntity> images;
   final int index;
   final FlutterTts tts;
@@ -44,7 +44,7 @@ class _PageViewWidgetState extends State<PageViewWidget> {
         itemBuilder: (context, index) {
           return Container(
             color: Colors.blue.withOpacity(index * 0.1),
-            child: DetailRoute(image: widget.images[index], tts: widget.tts),
+            child: DetailRoute(image: widget.images[index], tts: widget.tts, desc: widget.desc,),
             // child: Center(
             //   child: Text(
             //     widget.images[index].id,

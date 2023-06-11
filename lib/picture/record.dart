@@ -51,29 +51,72 @@ class _RecordPageState extends State<RecordPage> {
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
-    SQLHelper.getInfos().then((value) => print(value));
     return Scaffold(
       appBar: AppBar(title: const Text('촬영 모드')),
       // You must wait until the controller is initialized before displaying the
       // camera preview. Use a FutureBuilder to display a loading spinner until the
       // controller has finished initializing.
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the preview.
-            return Column(children: [
-              Expanded(
-                child: CameraPreview(
-                  _controller,
-                ),
-              ),
-            ]);
-          } else {
-            // Otherwise, display a loading indicator.
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: GestureDetector(
+        onDoubleTap: (){
+          Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => MyHomePage(
+                        title: 'MyMemory Proto1', camera: widget.camera)),
+                (route) => false);
         },
+        onTap:() async{
+          try {
+              // Ensure that the camera is initialized.
+              await _initializeControllerFuture;
+
+              // Attempt to take a picture and get the file `image`
+              // where it was saved.
+              final image = await _controller.takePicture();
+
+              if (!mounted) return;
+
+              // If the picture was taken, display it on a new screen.
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DisplayPictureScreen(
+                      // Pass the automatically generated path to
+                      // the DisplayPictureScreen widget.
+                      imagePath: image.path,
+                      tts: widget.tts),
+                ),
+              );
+            } catch (e) {
+              // If an error occurs, log the error to the console.
+              print(e);
+            }
+        },
+        onLongPress: (){
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AlbumRoute(tts: widget.tts)),
+            );
+        },
+        child: FutureBuilder<void>(
+          future: _initializeControllerFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              // If the Future is complete, display the preview.
+              return Column(children: [
+                Expanded(
+                  child: CameraPreview(
+                    _controller,
+                  ),
+                ),
+              ]);
+            } else {
+              // Otherwise, display a loading indicator.
+              return const Center(child: CircularProgressIndicator());
+            }
+          },
+        ),
       ),
       // floatingActionButton: FloatingActionButton(
       //   // Provide an onPressed callback.

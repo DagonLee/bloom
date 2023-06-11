@@ -38,23 +38,21 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
     return data;
   }
 
-  // @override
-  // void initState() {
-  //   // api 호출
-  //   callApi(File(widget.imagePath)).then((value) {
-  //     print(value);
-  //     final ans = json.decode(value);
+  @override
+  void initState() {
+    // api 호출
+    callApi(File(widget.imagePath)).then((value) {
+      final ans = json.decode(value);
 
-  //     getTranslation_papago(ans["ans"]).then((value) {
-  //       tmpRes = value;
-  //       widget.tts.speak(value);
-  //       widget.tts.speak("사진 저장을 원하시면 화면을 두드려주세요!");
-  //     });
-  //     // widget.tts.speak(res);
-  //   });
+      getTranslation_papago(ans["ans"]).then((value) {
+        tmpRes = value;
+        widget.tts.speak(value);
+        widget.tts.speak("사진 저장을 원하시면 화면을 터치해주세요!");
+      });
+    });
 
-  //   // super.initState();
-  // }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,14 +64,22 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
       // // The image is stored as a file on the device. Use the `Image.file`
       // // constructor with the given path to display the image.
       body: GestureDetector(
+        onLongPress: () {
+            print("앨범모드로 이동");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AlbumRoute(tts: widget.tts)),
+            );
+          },
+        onDoubleTap: (){
+          Navigator.pop(context);
+        },
           onTap: () {
             GallerySaver.saveImage(widget.imagePath, albumName: "MyMemory")
                 .then((value) => widget.tts.speak("사진 저장을 성공하였습니다."));
-            print(tmpRes);
             String imageName = widget.imagePath.split("/").last;
-            print(imageName);
             addItem(imageName, tmpRes);
-            SQLHelper.getInfos().then((value) => print(value));
           },
           child: Column(
             children: [

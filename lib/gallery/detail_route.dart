@@ -6,10 +6,11 @@ import 'package:photo_view/photo_view.dart';
 class DetailRoute extends StatelessWidget {
   AssetEntity image;
   FlutterTts tts;
-
+  String desc;
   DetailRoute({
     required this.image,
     required this.tts,
+    required this.desc,
     Key? key,
   }) : super(key: key);
 
@@ -30,7 +31,7 @@ class DetailRoute extends StatelessWidget {
             initialScale: PhotoViewComputedScale.contained,
             backgroundDecoration: BoxDecoration(color: Colors.transparent),
           )),
-          Text("사진에 대한 설명이 나온다")
+          Text(desc)
         ]),
       );
     });
