@@ -7,6 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'gallery/sample_screen.dart';
 import 'sqlhelper.dart';
 import 'picture/record.dart';
+
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
@@ -16,7 +17,7 @@ Future<void> main() async {
 
   // Get a specific camera from the list of available cameras.
   final firstCamera = cameras.first;
-  
+
   runApp(MaterialApp(
     title: 'My Memory Proto1',
     theme: ThemeData(
@@ -24,6 +25,7 @@ Future<void> main() async {
       useMaterial3: true,
     ),
     home: MyHomePage(title: 'MyMemory Proto1', camera: firstCamera),
+    debugShowCheckedModeBanner: false,
   ));
 }
 
@@ -64,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     // TODO: implement initState
-    
+
     SQLHelper.getInfos().then((value) => print(value));
     super.initState();
     initTts();
@@ -179,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Text(widget.title),
         ),
         body: GestureDetector(
-          onDoubleTap: (){
+          onDoubleTap: () {
             print("촬영모드로 이동");
             Navigator.push(
               context,
@@ -188,37 +190,92 @@ class _MyHomePageState extends State<MyHomePage> {
                       RecordPage(camera: widget.camera, tts: flutterTts)),
             );
           },
-          onLongPress: (){
+          onLongPress: () {
             print("앨범모드로 이동");
             Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AlbumRoute(tts: flutterTts)),
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AlbumRoute(tts: flutterTts)),
             );
           },
-          child: Container(
-            child: Center(
-              child: Row(mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Press"),
-                              ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              RecordPage(camera: widget.camera, tts: flutterTts)),
-                    );
-                  },
-                  child: const Text('촬영모드')),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AlbumRoute(tts: flutterTts)),
-                    );
-                  },
-                  child: const Text('앨범모드')),
-            ])),
+          child: Center(
+            child: Container(
+              // color: Colors.orangeAccent,
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: 20, right: 40, left: 40, bottom: 40),
+                child: Column(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            print('Camera 버튼 클릭!');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => RecordPage(
+                                      camera: widget.camera, tts: flutterTts)),
+                            );
+                          },
+                          //Contents of the button
+                          style: ElevatedButton.styleFrom(
+                            //Change font size
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                            ),
+                            //padding: const EdgeInsets.all(50.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0)),
+                          ),
+                          icon: Icon(
+                            Icons.camera_alt_outlined,
+                            size: 50,
+                          ),
+                          label: Text('Camera'),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            print('Gallery 버튼 클릭!');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      AlbumRoute(tts: flutterTts)),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            //Change font size
+                            textStyle: const TextStyle(
+                              fontSize: 18,
+                            ),
+                            padding: const EdgeInsets.all(50.0),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20.0)),
+                          ),
+                          icon: Icon(
+                            Icons.photo_outlined,
+                            size: 50,
+                          ),
+                          label: Text('Gallery'),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       );
