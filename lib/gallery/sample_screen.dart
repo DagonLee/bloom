@@ -1,14 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import 'album.dart';
 import 'grid_photo.dart';
 import 'selected_image.dart';
 import 'detail_route.dart';
+import '../sqlhelper.dart';
+
+
 
 class AlbumRoute extends StatefulWidget {
-  const AlbumRoute({Key? key}) : super(key: key);
-
+  const AlbumRoute({super.key, required this.tts});
+  final FlutterTts tts;
   @override
   State<AlbumRoute> createState() => _AlbumRouteState();
 }
@@ -37,8 +43,9 @@ class _AlbumRouteState extends State<AlbumRoute> {
       type: RequestType.image,
     );
 
-    _paths!.removeWhere((item) => item.name != "Recents");
-    print(_paths);
+    _paths!.removeWhere((item) => item.name != "MyMemory");
+    // print("*****");
+    print( _paths);
     _albums = _paths!.map((e) {
       return Album(
         id: e.id,
@@ -78,12 +85,18 @@ class _AlbumRouteState extends State<AlbumRoute> {
     });
   }
 
-  void _selectImage(SelectedImage image) {
+  void _selectImage(SelectedImage image) async {
     print("_selectImage::sample_screen.dart");
-    print(image.entity);
+    File? originFile = await image.entity.originFile;
+    String originPath = originFile!.path;
+    String file_name = originPath.split("/").last;
+    SQLHelper.getItem(file_name).then((value)=> {
+        widget.tts.speak(value.first["imgDesc"])
+    });
+
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => DetailRoute(image: image.entity)),
+      MaterialPageRoute(builder: (context) => DetailRoute(image: image.entity, tts: widget.tts)),
     );
     // final addedImageCheck =
     //     _selectedImages.any((e) => _addedImageCheck(image, e));

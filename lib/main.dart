@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'gallery/sample_screen.dart';
-
+import 'sqlhelper.dart';
+import 'picture/record.dart';
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
   // can be called before `runApp()`
@@ -18,6 +16,7 @@ Future<void> main() async {
 
   // Get a specific camera from the list of available cameras.
   final firstCamera = cameras.first;
+  
   runApp(MaterialApp(
     title: 'My Memory Proto1',
     theme: ThemeData(
@@ -65,9 +64,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     // TODO: implement initState
+    
+    SQLHelper.getInfos().then((value) => print(value));
     super.initState();
     initTts();
-    _speak("안녕하세요 My Memory 입니다 환영합니다.");
+    _speak("안녕하세요 My Memory 입니다.");
   }
 
   initTts() {
@@ -177,203 +178,258 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text(widget.title),
         ),
-        body: Center(
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          RecordPage(camera: widget.camera, tts: flutterTts)),
-                );
-              },
-              child: const Text('촬영모드')),
-          ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AlbumRoute()),
-                );
-              },
-              child: const Text('앨범모드')),
-        ])),
+        body: GestureDetector(
+          onDoubleTap: (){
+            print("촬영모드로 이동");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      RecordPage(camera: widget.camera, tts: flutterTts)),
+            );
+          },
+          onLongPress: (){
+            print("앨범모드로 이동");
+            Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AlbumRoute(tts: flutterTts)),
+            );
+          },
+          child: Container(
+            child: Center(
+              child: Row(mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Press"),
+                              ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              RecordPage(camera: widget.camera, tts: flutterTts)),
+                    );
+                  },
+                  child: const Text('촬영모드')),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AlbumRoute(tts: flutterTts)),
+                    );
+                  },
+                  child: const Text('앨범모드')),
+            ])),
+          ),
+        ),
       );
     });
   }
 }
 
-class RecordPage extends StatefulWidget {
-  final CameraDescription camera;
-  final FlutterTts tts;
-  RecordPage({super.key, required this.camera, required this.tts});
-  @override
-  State<RecordPage> createState() => _RecordPageState();
-}
+// class RecordPage extends StatefulWidget {
+//   final CameraDescription camera;
+//   final FlutterTts tts;
+//   RecordPage({super.key, required this.camera, required this.tts});
+//   @override
+//   State<RecordPage> createState() => _RecordPageState();
+// }
 
-class _RecordPageState extends State<RecordPage> {
-  late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
-  @override
-  void initState() {
-    _speak("촬영모드입니다.");
-    super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
-    _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
-      widget.camera,
-      // Define the resolution to use.
-      ResolutionPreset.medium,
-    );
-    // Next, initialize the controller. This returns a Future.
-    _initializeControllerFuture = _controller.initialize();
-  }
+// class _RecordPageState extends State<RecordPage> {
+//   late CameraController _controller;
+//   late Future<void> _initializeControllerFuture;
+//   @override
+//   void initState() {
+//     _speak("촬영모드입니다.");
+//     super.initState();
+//     // To display the current output from the Camera,
+//     // create a CameraController.
+//     _controller = CameraController(
+//       // Get a specific camera from the list of available cameras.
+//       widget.camera,
+//       // Define the resolution to use.
+//       ResolutionPreset.medium,
+//     );
+//     // Next, initialize the controller. This returns a Future.
+//     _initializeControllerFuture = _controller.initialize();
+//   }
 
-  Future _speak(String txt) async {
-    if (txt != "") {
-      await widget.tts.speak(txt);
-    }
-  }
+//   Future _speak(String txt) async {
+//     if (txt != "") {
+//       await widget.tts.speak(txt);
+//     }
+//   }
 
-  @override
-  void dispose() {
-    // Dispose of the controller when the widget is disposed.
-    _controller.dispose();
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     // Dispose of the controller when the widget is disposed.
+//     _controller.dispose();
+//     super.dispose();
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('촬영 모드')),
-      // You must wait until the controller is initialized before displaying the
-      // camera preview. Use a FutureBuilder to display a loading spinner until the
-      // controller has finished initializing.
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
-          } else {
-            // Otherwise, display a loading indicator.
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        // Provide an onPressed callback.
-        onPressed: () async {
-          // Take the Picture in a try / catch block. If anything goes wrong,
-          // catch the error.
-          try {
-            // Ensure that the camera is initialized.
-            await _initializeControllerFuture;
+//   @override
+//   Widget build(BuildContext context) {
+//     SQLHelper.getInfos().then((value) => print(value));
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('촬영 모드')),
+//       // You must wait until the controller is initialized before displaying the
+//       // camera preview. Use a FutureBuilder to display a loading spinner until the
+//       // controller has finished initializing.
+//       body: FutureBuilder<void>(
+//         future: _initializeControllerFuture,
+//         builder: (context, snapshot) {
+//           if (snapshot.connectionState == ConnectionState.done) {
+//             // If the Future is complete, display the preview.
+//             return CameraPreview(_controller);
+//           } else {
+//             // Otherwise, display a loading indicator.
+//             return const Center(child: CircularProgressIndicator());
+//           }
+//         },
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         // Provide an onPressed callback.
+//         onPressed: () async {
+//           // Take the Picture in a try / catch block. If anything goes wrong,
+//           // catch the error.
+//           try {
+//             // Ensure that the camera is initialized.
+//             await _initializeControllerFuture;
 
-            // Attempt to take a picture and get the file `image`
-            // where it was saved.
-            final image = await _controller.takePicture();
+//             // Attempt to take a picture and get the file `image`
+//             // where it was saved.
+//             final image = await _controller.takePicture();
 
-            if (!mounted) return;
+//             if (!mounted) return;
 
-            // If the picture was taken, display it on a new screen.
-            await Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => DisplayPictureScreen(
-                    // Pass the automatically generated path to
-                    // the DisplayPictureScreen widget.
-                    imagePath: image.path,
-                    tts: widget.tts),
-              ),
-            );
-          } catch (e) {
-            // If an error occurs, log the error to the console.
-            print(e);
-          }
-        },
-        child: const Icon(Icons.camera_alt),
-      ),
-    );
-  }
-}
+//             // If the picture was taken, display it on a new screen.
+//             await Navigator.of(context).push(
+//               MaterialPageRoute(
+//                 builder: (context) => DisplayPictureScreen(
+//                     // Pass the automatically generated path to
+//                     // the DisplayPictureScreen widget.
+//                     imagePath: image.path,
+//                     tts: widget.tts),
+//               ),
+//             );
+//           } catch (e) {
+//             // If an error occurs, log the error to the console.
+//             print(e);
+//           }
+//         },
+//         child: const Icon(Icons.camera_alt),
+//       ),
+//     );
+//   }
+// }
 
 // A widget that displays the picture taken by the user.
-class DisplayPictureScreen extends StatefulWidget {
-  final String imagePath;
-  final FlutterTts tts;
-  const DisplayPictureScreen(
-      {super.key, required this.imagePath, required this.tts});
-  @override
-  DisplayPictureState createState() => DisplayPictureState();
-}
+// class DisplayPictureScreen extends StatefulWidget {
+//   final String imagePath;
+//   final FlutterTts tts;
+//   const DisplayPictureScreen(
+//       {super.key, required this.imagePath, required this.tts});
+//   @override
+//   DisplayPictureState createState() => DisplayPictureState();
+// }
 
-class DisplayPictureState extends State<DisplayPictureScreen> {
-  Future<String> callApi(dynamic file) async {
-    var postUri = Uri.parse("http://211.184.1.44:5000/predict");
-    var request = http.MultipartRequest("POST", postUri);
-    request.files.add(await http.MultipartFile.fromPath(
-        "file", widget.imagePath,
-        contentType: new MediaType('image', 'jpeg')));
+// class DisplayPictureState extends State<DisplayPictureScreen> {
+//   var tmpRes;
+//   Future<String> callApi(dynamic file) async {
+//     // var postUri = Uri.parse("http://211.184.1.44:5000/predict");
+//     var postUri = Uri.parse("http://172.20.10.8:5000/predict");
+//     var request = http.MultipartRequest("POST", postUri);
+//     request.files.add(await http.MultipartFile.fromPath(
+//         "file", widget.imagePath,
+//         contentType: new MediaType('image', 'jpeg')));
 
-    // Await the http get response, then decode the json-formatted response.
-    var streamedResponse = await request.send();
-    var response = await http.Response.fromStream(streamedResponse);
-    var data = response.body;
-    return data;
-  }
+//     // Await the http get response, then decode the json-formatted response.
+//     var streamedResponse = await request.send();
+//     var response = await http.Response.fromStream(streamedResponse);
+//     var data = response.body;
+//     return data;
+//   }
 
-  @override
-  void initState() {
-    // api 호출
-    callApi(File(widget.imagePath)).then((value) {
-      print(value);
-      final ans = json.decode(value);
-      // widget.tts.speak(ans["ans"]);
-      getTranslation_papago(ans["ans"]).then((value) {
-        widget.tts.speak(value);
-      });
-      // widget.tts.speak(res);
-    });
+//   @override
+//   void initState() {
+//     // api 호출
+//     callApi(File(widget.imagePath)).then((value) {
+//       print(value);
+//       final ans = json.decode(value);
+      
+//       getTranslation_papago(ans["ans"]).then((value) {
+//         tmpRes = value;
+//         widget.tts.speak(value);
+//         widget.tts.speak("사진 저장을 원하시면 화면을 두드려주세요!");
+//       });
+//       // widget.tts.speak(res);
+//     });
+    
+//     super.initState();
+//   }
 
-    super.initState();
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     widget.tts.speak("사진을 해석중입니다");
+    
+//     return Scaffold(
+      
+//       appBar: AppBar(title: const Text('Display the Picture')),
+//       // // The image is stored as a file on the device. Use the `Image.file`
+//       // // constructor with the given path to display the image.
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Display the Picture')),
-      // The image is stored as a file on the device. Use the `Image.file`
-      // constructor with the given path to display the image.
-      body: Image.file(File(widget.imagePath)),
-    );
-  }
-}
+//       body:GestureDetector(
+//           onTap: () {
+//             GallerySaver.saveImage(widget.imagePath,albumName: "MyMemory").then((value) => widget.tts.speak("사진 저장을 성공하였습니다."));
+//             print(tmpRes);
+//             String imageName = widget.imagePath.split("/").last;
+//             print(imageName);
+//             addItem(imageName, tmpRes);
+//             SQLHelper.getInfos().then((value)=> print(value));
+//           },
+//         child:Container(
+//           child: Image.file(File(widget.imagePath)),
+//         )
+//       )
+//     );
+//     // );
+//   }
+// }
 
-Future getTranslation_papago(String txt) async {
-  String _client_id = "WYX9Cy9eD1ffV5IUEDAo";
-  String _client_secret = "n2AsCIc6L6";
-  String _content_type = "application/x-www-form-urlencoded; charset=UTF-8";
-  String _url = "https://openapi.naver.com/v1/papago/n2mt";
+// Future getTranslation_papago(String txt) async {
+//   String _client_id = "WYX9Cy9eD1ffV5IUEDAo";
+//   String _client_secret = "n2AsCIc6L6";
+//   String _content_type = "application/x-www-form-urlencoded; charset=UTF-8";
+//   String _url = "https://openapi.naver.com/v1/papago/n2mt";
 
-  http.Response trans = await http.post(
-    Uri.parse(_url),
-    headers: {
-      'Content-Type': _content_type,
-      'X-Naver-Client-Id': _client_id,
-      'X-Naver-Client-Secret': _client_secret
-    },
-    body: {
-      'source': "en", //위에서 언어 판별 함수에서 사용한 language 변수
-      'target': "ko", //원하는 언어를 선택할 수 있다.
-      'text': txt,
-    },
-  );
-  if (trans.statusCode == 200) {
-    var dataJson = jsonDecode(trans.body);
-    var resultPapago = dataJson['message']['result']['translatedText'];
-    return resultPapago;
-  } else {
-    return trans.statusCode;
-  }
-}
+//   http.Response trans = await http.post(
+//     Uri.parse(_url),
+//     headers: {
+//       'Content-Type': _content_type,
+//       'X-Naver-Client-Id': _client_id,
+//       'X-Naver-Client-Secret': _client_secret
+//     },
+//     body: {
+//       'source': "en", //위에서 언어 판별 함수에서 사용한 language 변수
+//       'target': "ko", //원하는 언어를 선택할 수 있다.
+//       'text': txt,
+//     },
+//   );
+//   if (trans.statusCode == 200) {
+//     var dataJson = jsonDecode(trans.body);
+//     var resultPapago = dataJson['message']['result']['translatedText'];
+//     return resultPapago;
+//   } else {
+//     return trans.statusCode;
+//   }
+// }
+
+// Future<void> addItem(String imgname, String imgdesc) async {
+//     await SQLHelper.createInfo(
+//         imgname, imgdesc);
+//   }
+
+// // Delete an item
+// void deleteItem(String imgName) async {
+//   await SQLHelper.deleteItem(imgName).then((value) => print("성공적으로 삭제되었습니다."));
+  
+// }
