@@ -70,8 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
     SQLHelper.getInfos().then((value) => print(value));
     super.initState();
     initTts();
-    _speak("안녕하세요 My Memory 입니다.");
-    _speak("조작법에 대해서 설명드리겠습니다.");
   }
 
   initTts() {

@@ -41,9 +41,10 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
   @override
   void initState() {
     // api 호출
+    widget.tts.speak("사진을 해석 중입니다.");
     callApi(File(widget.imagePath)).then((value) {
       final ans = json.decode(value);
-
+      
       getTranslation_papago(ans["ans"]).then((value) {
         tmpRes = value;
         widget.tts.speak(value);
@@ -57,7 +58,6 @@ class DisplayPictureState extends State<DisplayPictureScreen> {
   @override
   Widget build(BuildContext context) {
     var colorScheme = Theme.of(context).colorScheme;
-    widget.tts.speak("사진을 해석중입니다");
 
     return Scaffold(
       appBar: AppBar(title: const Text('Display the Picture')),

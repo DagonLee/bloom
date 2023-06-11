@@ -31,7 +31,7 @@ class DetailRoute extends StatelessWidget {
             initialScale: PhotoViewComputedScale.contained,
             backgroundDecoration: BoxDecoration(color: Colors.transparent),
           )),
-          Text(desc)
+          // Text(desc)
         ]),
       );
     });
