@@ -9,8 +9,7 @@ import 'grid_photo.dart';
 import 'selected_image.dart';
 import 'detail_route.dart';
 import '../sqlhelper.dart';
-
-
+import 'pageview.dart';
 
 class AlbumRoute extends StatefulWidget {
   const AlbumRoute({super.key, required this.tts});
@@ -44,12 +43,10 @@ class _AlbumRouteState extends State<AlbumRoute> {
     );
 
     _paths!.removeWhere((item) => item.name != "MyMemory");
-    // print("*****");
-    print( _paths);
+    print(_paths);
     _albums = _paths!.map((e) {
       return Album(
         id: e.id,
-        // name: e.isAll ? '모든 사진' : e.name,
         name: e.name,
       );
     }).toList();
@@ -90,13 +87,17 @@ class _AlbumRouteState extends State<AlbumRoute> {
     File? originFile = await image.entity.originFile;
     String originPath = originFile!.path;
     String file_name = originPath.split("/").last;
-    SQLHelper.getItem(file_name).then((value)=> {
-        widget.tts.speak(value.first["imgDesc"])
-    });
-
+    // SQLHelper.getItem(file_name)
+    //     .then((value) => {widget.tts.speak(value.first["imgDesc"])});
+    final index = _images.indexWhere(((item) => item.id == image.entity.id));
+    print(index);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => DetailRoute(image: image.entity, tts: widget.tts)),
+      MaterialPageRoute(
+          // builder: (context) =>
+          //     DetailRoute(image: image.entity, tts: widget.tts)),
+          builder: (context) =>
+              PageViewWidget(images: _images, index: index, tts: widget.tts)),
     );
     // final addedImageCheck =
     //     _selectedImages.any((e) => _addedImageCheck(image, e));
@@ -125,19 +126,7 @@ class _AlbumRouteState extends State<AlbumRoute> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-            child: _albums.isNotEmpty
-                ? DropdownButton(
-                    value: _currentAlbum,
-                    items: _albums
-                        .map((e) => DropdownMenuItem(
-                              value: e,
-                              child: Text(e.name),
-                            ))
-                        .toList(),
-                    onChanged: (value) => getPhotos(value!, albumChange: true),
-                  )
-                : const SizedBox()),
+        title: const Text(''),
       ),
       body: NotificationListener<ScrollNotification>(
         // 현재 스크롤 위치 - scroll.metrics.pixels

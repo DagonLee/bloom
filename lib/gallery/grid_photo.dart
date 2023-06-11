@@ -15,9 +15,6 @@ class GridPhoto extends StatelessWidget {
   void _selectImage(AssetEntity e) {
     // final item = SelectedImage(entity: e, file: null);
     final item = SelectedImage(entity: e);
-    print(item);
-    print("_selectImage::grid_photo");
-    print(item.entity);
     onTap(item);
   }
 
@@ -37,7 +34,6 @@ class GridPhoto extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         _selectImage(e);
-        // print(e);
       },
       child: Padding(
         padding: const EdgeInsets.all(1.0),
