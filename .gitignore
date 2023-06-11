@@ -2,3 +2,6 @@
 build/*
 .dart_tool/*
 ios/*
+macos/*
+.flutter-plugins
+ios/Runner.xcodeproj/project.pbxproj
