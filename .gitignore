@@ -1,7 +1,0 @@
-.flutter-plugins-dependencies
-build/*
-.dart_tool/*
-ios/*
-macos/*
-.flutter-plugins
-ios/Runner.xcodeproj/project.pbxproj
